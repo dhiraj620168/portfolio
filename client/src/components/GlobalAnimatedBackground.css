@@ -1,0 +1,87 @@
+.global-animated-background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 15% 20%, #3b82f625, transparent 45%),
+    radial-gradient(ellipse at 85% 35%, #a855f725, transparent 45%),
+    var(--page-bg, #f8fafc);
+}
+
+.global-glow {
+  position: absolute;
+  width: 350px;
+  height: 350px;
+  border-radius: 50%;
+  filter: blur(85px);
+  opacity: 0.3;
+  animation: glow-move 14s ease-in-out infinite alternate;
+}
+
+.glow-one {
+  top: 5%;
+  left: -100px;
+  background: #3b82f6;
+}
+
+.glow-two {
+  top: 35%;
+  right: -100px;
+  background: #a855f7;
+  animation-delay: -5s;
+}
+
+.glow-three {
+  bottom: 0;
+  left: 35%;
+  background: #22d3ee;
+  animation-delay: -8s;
+}
+
+.global-flower {
+  position: absolute;
+  top: -30px;
+  color: #ec4899;
+  font-size: 22px;
+  opacity: 0;
+  animation: flower-fall 15s linear infinite;
+}
+
+@keyframes flower-fall {
+  0% {
+    transform: translateY(-30px) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  90% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(110vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes glow-move {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(80px, 50px, 0) scale(1.2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .global-glow,
+  .global-flower {
+    animation: none;
+  }
+
+  .global-flower {
+    display: none;
+  }
+}
