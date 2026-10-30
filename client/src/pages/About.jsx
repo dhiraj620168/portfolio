@@ -13,9 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+import api from "../services/api";
 
 const ICONS = {
   GraduationCap,
@@ -89,37 +87,36 @@ export default function About() {
   const [activeFocusIndex, setActiveFocusIndex] = useState(0);
 
   useEffect(() => {
-    const controller = new AbortController();
+    let active = true;
 
     async function loadProfile() {
       try {
-        const response = await fetch(`${API_BASE_URL}/profile`, {
-          cache: "no-store",
-          signal: controller.signal,
-        });
-
-        if (!response.ok) {
-          throw new Error(`Profile request failed (${response.status})`);
-        }
-
-        const result = await response.json();
+        const result = await api.get("/profile");
         const data = result.profile ?? result.data ?? result;
+
+        if (!active) return;
+
         setProfile(data);
         setError("");
       } catch (err) {
-        if (err.name !== "AbortError") {
-          console.error("Unable to load About profile:", err);
-          setError(
-            "Profile details could not be loaded. Please try again later.",
-          );
-        }
+        if (!active) return;
+
+        console.error("Unable to load About profile:", err);
+        setError(
+          "Profile details could not be loaded. Please try again later.",
+        );
       } finally {
-        if (!controller.signal.aborted) setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
     }
 
     loadProfile();
-    return () => controller.abort();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {

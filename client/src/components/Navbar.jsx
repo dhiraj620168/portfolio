@@ -54,28 +54,50 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   // Load resume URL from the profile API.
+  // useEffect(() => {
+  //   const controller = new AbortController();
+
+  //   async function loadResume() {
+  //     try {
+  //       const response = await fetch(`${API_BASE_URL}/profile`, {
+  //         cache: "no-store",
+  //         signal: controller.signal,
+  //       });
+
+  //       if (!response.ok) {
+  //         throw new Error("Unable to load resume URL");
+  //       }
+
+  //       const result = await response.json();
+  //       const profile = result.profile ?? result.data ?? result;
+
+  //       if (profile.resumeUrl) {
+  //         setResumeUrl(profile.resumeUrl);
+  //       }
+  //     } catch (error) {
+  //       if (error.name !== "AbortError") {
+  //         console.error("Could not load resume URL:", error);
+  //       }
+  //     }
+  //   }
+
+  //   loadResume();
+
+  //   return () => controller.abort();
+  // }, []);
   useEffect(() => {
-    const controller = new AbortController();
+    let active = true;
 
     async function loadResume() {
       try {
-        const response = await fetch(`${API_BASE_URL}/profile`, {
-          cache: "no-store",
-          signal: controller.signal,
-        });
-
-        if (!response.ok) {
-          throw new Error("Unable to load resume URL");
-        }
-
-        const result = await response.json();
+        const result = await api.get("/profile");
         const profile = result.profile ?? result.data ?? result;
 
-        if (profile.resumeUrl) {
+        if (active && profile.resumeUrl) {
           setResumeUrl(profile.resumeUrl);
         }
       } catch (error) {
-        if (error.name !== "AbortError") {
+        if (active) {
           console.error("Could not load resume URL:", error);
         }
       }
@@ -83,7 +105,9 @@ export default function Navbar() {
 
     loadResume();
 
-    return () => controller.abort();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const resolvedResumeUrl = resolveResumeUrl(resumeUrl);

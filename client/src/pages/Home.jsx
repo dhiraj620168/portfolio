@@ -17,6 +17,7 @@ import {
   Sparkles,
   UserRound,
 } from "lucide-react";
+import api from "../services/api";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
@@ -93,22 +94,54 @@ export default function Home() {
   const [imageError, setImageError] = useState(false);
 
   // Fetch the profile from the existing backend API.
+  // useEffect(() => {
+  //   const controller = new AbortController();
+
+  //   async function fetchProfile() {
+  //     try {
+  //       const response = await fetch(`${API_URL}/profile`, {
+  //         signal: controller.signal,
+  //         cache: "no-store",
+  //       });
+
+  //       if (!response.ok) {
+  //         throw new Error(`Profile request failed: ${response.status}`);
+  //       }
+
+  //       const result = await response.json();
+  //       const data = result.profile ?? result.data ?? result;
+
+  //       setProfile((previous) => ({
+  //         ...previous,
+  //         ...data,
+  //       }));
+
+  //       setProfileError(false);
+  //     } catch (error) {
+  //       if (error.name !== "AbortError") {
+  //         console.error("Failed to fetch profile:", error);
+  //         setProfileError(true);
+  //       }
+  //     } finally {
+  //       if (!controller.signal.aborted) {
+  //         setLoading(false);
+  //       }
+  //     }
+  //   }
+
+  //   fetchProfile();
+
+  //   return () => controller.abort();
+  // }, []);
   useEffect(() => {
-    const controller = new AbortController();
+    let isMounted = true;
 
     async function fetchProfile() {
       try {
-        const response = await fetch(`${API_URL}/profile`, {
-          signal: controller.signal,
-          cache: "no-store",
-        });
-
-        if (!response.ok) {
-          throw new Error(`Profile request failed: ${response.status}`);
-        }
-
-        const result = await response.json();
+        const result = await api.get("/profile");
         const data = result.profile ?? result.data ?? result;
+
+        if (!isMounted) return;
 
         setProfile((previous) => ({
           ...previous,
@@ -117,12 +150,12 @@ export default function Home() {
 
         setProfileError(false);
       } catch (error) {
-        if (error.name !== "AbortError") {
-          console.error("Failed to fetch profile:", error);
-          setProfileError(true);
-        }
+        if (!isMounted) return;
+
+        console.error("Failed to fetch profile:", error);
+        setProfileError(true);
       } finally {
-        if (!controller.signal.aborted) {
+        if (isMounted) {
           setLoading(false);
         }
       }
@@ -130,36 +163,66 @@ export default function Home() {
 
     fetchProfile();
 
-    return () => controller.abort();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Fetch skills from the existing backend skills endpoint.
+  // useEffect(() => {
+  //   const controller = new AbortController();
+
+  //   async function fetchSkills() {
+  //     try {
+  //       const response = await fetch(`${API_URL}/skills`, {
+  //         signal: controller.signal,
+  //         cache: "no-store",
+  //       });
+
+  //       if (!response.ok) {
+  //         throw new Error(`Skills request failed: ${response.status}`);
+  //       }
+
+  //       const result = await response.json();
+  //       const skillsData = getSkillsArray(result);
+
+  //       setSkills(skillsData);
+  //       setSkillsError(false);
+  //     } catch (error) {
+  //       if (error.name !== "AbortError") {
+  //         console.error("Failed to fetch skills:", error);
+  //         setSkillsError(true);
+  //       }
+  //     } finally {
+  //       if (!controller.signal.aborted) {
+  //         setSkillsLoading(false);
+  //       }
+  //     }
+  //   }
+
+  //   fetchSkills();
+
+  //   return () => controller.abort();
+  // }, []);
   useEffect(() => {
-    const controller = new AbortController();
+    let isMounted = true;
 
     async function fetchSkills() {
       try {
-        const response = await fetch(`${API_URL}/skills`, {
-          signal: controller.signal,
-          cache: "no-store",
-        });
-
-        if (!response.ok) {
-          throw new Error(`Skills request failed: ${response.status}`);
-        }
-
-        const result = await response.json();
+        const result = await api.get("/skills");
         const skillsData = getSkillsArray(result);
+
+        if (!isMounted) return;
 
         setSkills(skillsData);
         setSkillsError(false);
       } catch (error) {
-        if (error.name !== "AbortError") {
-          console.error("Failed to fetch skills:", error);
-          setSkillsError(true);
-        }
+        if (!isMounted) return;
+
+        console.error("Failed to fetch skills:", error);
+        setSkillsError(true);
       } finally {
-        if (!controller.signal.aborted) {
+        if (isMounted) {
           setSkillsLoading(false);
         }
       }
@@ -167,9 +230,10 @@ export default function Home() {
 
     fetchSkills();
 
-    return () => controller.abort();
+    return () => {
+      isMounted = false;
+    };
   }, []);
-
   const { primary, secondary } = getProfileTitle(profile.professionalTitle);
 
   const introduction =
