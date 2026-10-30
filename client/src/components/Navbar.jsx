@@ -139,6 +139,42 @@ export default function Navbar() {
     const sectionIds = links.map((link) => link.id);
     let ticking = false;
 
+    // const updateActiveSection = () => {
+    //   const marker = 150;
+
+    //   const sections = sectionIds
+    //     .map((id) => document.getElementById(id))
+    //     .filter(Boolean);
+
+    //   let currentSection = null;
+    //   let closestTop = -Infinity;
+
+    //   for (const section of sections) {
+    //     const top = section.getBoundingClientRect().top;
+
+    //     if (top <= marker && top > closestTop) {
+    //       closestTop = top;
+    //       currentSection = section;
+    //     }
+    //   }
+
+    //   if (!currentSection && sections.length > 0) {
+    //     currentSection = sections.reduce((first, section) =>
+    //       section.getBoundingClientRect().top <
+    //       first.getBoundingClientRect().top
+    //         ? section
+    //         : first,
+    //     );
+    //   }
+
+    //   const current = currentSection?.id || "home";
+
+    //   setActiveSection((previous) =>
+    //     previous === current ? previous : current,
+    //   );
+
+    //   ticking = false;
+    // };
     const updateActiveSection = () => {
       const marker = 150;
 
@@ -146,36 +182,35 @@ export default function Navbar() {
         .map((id) => document.getElementById(id))
         .filter(Boolean);
 
-      let currentSection = null;
-      let closestTop = -Infinity;
-
-      for (const section of sections) {
-        const top = section.getBoundingClientRect().top;
-
-        if (top <= marker && top > closestTop) {
-          closestTop = top;
-          currentSection = section;
-        }
+      if (!sections.length) {
+        ticking = false;
+        return;
       }
 
-      if (!currentSection && sections.length > 0) {
-        currentSection = sections.reduce((first, section) =>
-          section.getBoundingClientRect().top <
-          first.getBoundingClientRect().top
-            ? section
-            : first,
-        );
+      const atPageBottom =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 2;
+
+      if (atPageBottom) {
+        setActiveSection("contact");
+        ticking = false;
+        return;
       }
 
-      const current = currentSection?.id || "home";
+      const currentSection = sections.find((section) => {
+        const rect = section.getBoundingClientRect();
 
-      setActiveSection((previous) =>
-        previous === current ? previous : current,
-      );
+        return rect.top <= marker && rect.bottom > marker;
+      });
+
+      if (currentSection) {
+        setActiveSection(currentSection.id);
+      } else if (window.scrollY < 100) {
+        setActiveSection("home");
+      }
 
       ticking = false;
     };
-
     const onScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(updateActiveSection);
